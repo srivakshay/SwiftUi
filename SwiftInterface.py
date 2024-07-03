@@ -49,9 +49,24 @@ div.stButton > button:first-child {
 if 'ask_anything' not in st.session_state:
     st.session_state.ask_anything = False
 
+if 'download' not in st.session_state:
+    st.session_state.download = False
+
 
 def click_ask_anything():
     st.session_state.ask_anything = True
+    st.session_state.download = False
+
+
+def click_download():
+    st.session_state.download = True
+
+
+def download_file_from_api():
+    url = f"http://127.0.0.1:5000/download"
+    filename = "files.zip"
+    st.code(st.session_state.code)
+    st.markdown(f"[Download {filename}]({url})", unsafe_allow_html=True)
 
 
 uploaded_file = st.file_uploader("Select a file")
@@ -70,6 +85,7 @@ if uploaded_file is not None:
 
 if covert_to_java:
     st.session_state.ask_anything = False
+    st.session_state.download = False
     if uploaded_file is not None:
         typewriter("Uploading file - " + uploaded_file.name)
         upload_plsql_file()
@@ -86,14 +102,19 @@ if covert_to_java:
             asyncio.set_event_loop(loop)
             task = loop.create_task(generate_code())
             response = loop.run_until_complete(task)
-
+            st.session_state.code = response
             # Display response after spinner
             st.code(response)
+            download_file = st.button("Download Code", on_click=click_download)
+            if download_file:
+                st.session_state.download = True
 
     else:
         st.write("Please select file to convert")
-
+if st.session_state.download:
+    download_file_from_api()
 if st.session_state.ask_anything:
+    st.session_state.download = False
     if uploaded_file is not None:
         if prompt := st.chat_input("Ask anything"):
             typewriter("Sure - Here is the answer to your query " + '"' + prompt + '"')
@@ -102,12 +123,14 @@ if st.session_state.ask_anything:
                 st.write(response.json()["message"])
 
 if generate_business_doc:
+    st.session_state.download = False
     typewriter("Sure - Generating business documentation for the above code")
     with st.spinner("Generating business documentation"):
         response = requests.get("http://127.0.0.1:5000/generate_business_doc")
         st.write(response.json()["message"])
 
 if generate_tech_doc:
+    st.session_state.download = False
     typewriter("Sure - Generating business documentation for the above code")
     with st.spinner("Generating technical documentation"):
         response = requests.get("http://127.0.0.1:5000/generate_tech_doc")
