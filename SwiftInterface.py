@@ -74,12 +74,12 @@ col1, col2 = st.columns(2)
 with col1:
     covert_to_java = st.button("Convert code to Java")
 with col2:
-    generate_tech_doc = st.button("Generate technical documentation")
+    ask_anything = st.button("Converse with your code", on_click=click_ask_anything)
 col3, col4 = st.columns(2)
 with col3:
     generate_business_doc = st.button("Generate business documentation")
 with col4:
-    ask_anything = st.button("Ask Anything", on_click=click_ask_anything)
+    generate_tech_doc = st.button("Generate technical documentation")
 if uploaded_file is not None:
     st.code(uploaded_file.read().decode("utf-8"), language='plsql')
 
@@ -87,7 +87,6 @@ if covert_to_java:
     st.session_state.ask_anything = False
     st.session_state.download = False
     if uploaded_file is not None:
-        typewriter("Uploading file - " + uploaded_file.name)
         upload_plsql_file()
         typewriter("Analysing PLSQL Code ")
         response = requests.get(
@@ -123,6 +122,7 @@ if st.session_state.ask_anything:
                 st.write(response.json()["message"])
 
 if generate_business_doc:
+    st.empty()
     st.session_state.download = False
     typewriter("Sure - Generating business documentation for the above code")
     with st.spinner("Generating business documentation"):
@@ -130,6 +130,7 @@ if generate_business_doc:
         st.write(response.json()["message"])
 
 if generate_tech_doc:
+    st.empty()
     st.session_state.download = False
     typewriter("Sure - Generating business documentation for the above code")
     with st.spinner("Generating technical documentation"):
